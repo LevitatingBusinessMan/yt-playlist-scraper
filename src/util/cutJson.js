@@ -1,8 +1,6 @@
 //Cuts JSON from page
 
 function cutJson (startString, page) {
-	require("fs").writeFileSync("test2.html", page)
-
 
 	if (page.indexOf(startString) < 0) {
 		throw new Error("Unable to find starting string to cut from")
@@ -10,9 +8,6 @@ function cutJson (startString, page) {
 
 	let startIndex = page.indexOf(startString) + startString.length
 	const unCutJson = page.substring(startIndex).trim()
-
-
-	require("fs").writeFileSync("test3.html", unCutJson)
 
 	let open, close;
 	if (unCutJson[0] === '[') {
