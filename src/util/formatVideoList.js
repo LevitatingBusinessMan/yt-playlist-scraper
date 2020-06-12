@@ -53,7 +53,8 @@ function formatVideoList(ytData) {
 				endpoint: video.shortBylineText.runs[0].navigationEndpoint.browseEndpoint.canonicalBaseUrl,
 				id: video.shortBylineText.runs[0].navigationEndpoint.browseEndpoint.browseId
 			},
-			duration: video.lengthSeconds
+			index: parseInt(video.index.simpleText),
+			duration: parseInt(video.lengthSeconds)
 		}
 
 		videos.push(vidElement)
