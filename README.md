@@ -1,4 +1,4 @@
-If your project has the ability to use a Youtube API key I recommend using h[yt-playlists](https://github.com/LevitatingBusinessMan/yt-playlists) instead.
+If your project has the ability to use a Youtube API key I recommend using [yt-playlists](https://github.com/LevitatingBusinessMan/yt-playlists) instead.
 
 # YT-PLAYLIST-SCRAPER
 This is a utility for getting the data of videos in a youtube playlist.
