@@ -1,3 +1,5 @@
+const bestThumbnail = require("./bestThumbnail")
+
 function formatVideoList(ytInitialData) {
 
 	const rawVideoList = ytInitialData

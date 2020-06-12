@@ -1,9 +1,5 @@
 const https = require("https"),
-	bestThumbnail = require("./util/bestThumbnail"),
-	formatVideoList = require("./util/formatVideoList"),
-	cutJson = require("./util/cutJson")
-
-require("./util/String.between")
+	util = require("./util/index.js")
 
 const getPlaylist = ID => new Promise((resolve, reject) => {
 	
@@ -63,7 +59,7 @@ const getPlaylist = ID => new Promise((resolve, reject) => {
 					.microformatDataRenderer
 					.thumbnail
 					.thumbnails,
-				best: bestThumbnail(
+				best: util.bestThumbnail(
 						ytInitialData
 						.microformat
 						.microformatDataRenderer
@@ -72,7 +68,7 @@ const getPlaylist = ID => new Promise((resolve, reject) => {
 					)
 			}
 
-			let videos = formatVideoList(ytInitialData)
+			let videos = util.formatVideoList(ytInitialData)
 			
 			const results = {
 				id: ID,
@@ -135,15 +131,15 @@ const getPlaylist = ID => new Promise((resolve, reject) => {
 						
 						// Array of the videos inside the playlist
 						const newInitialData = collectData(html)
-						console.log(typeof newInitialData)
 
 						//Something went wrong fetching the json and it has been handled
 						if (!newInitialData)
 							return
 						
-						results.videos = results.videos.concat(formatVideoList(newInitialData))
+						results.videos = results.videos.concat(util.formatVideoList(newInitialData))
 
 						loadMore(newInitialData)
+
 					
 					})
 				})
@@ -157,9 +153,13 @@ const getPlaylist = ID => new Promise((resolve, reject) => {
 	function collectData(html) {
 
 		const beforeText = "window[\"ytInitialData\"] = "
-		const afterText = ";\n    window[\"ytInitialPlayerResponse\"]"
 	
-		const ytInitialData = html.between(beforeText, afterText)
+		try {
+			var ytInitialData = util.cutJson(beforeText, html)
+		} catch(err) {
+			reject(err)
+			return null
+		}
 	
 		if (!ytInitialData) {
 			reject(Error("Unable to retrieve playlist data"))
