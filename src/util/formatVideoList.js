@@ -43,7 +43,7 @@ function formatVideoList(ytData) {
 
 		const vidElement = {
 			id: video.videoId,
-			title: video.title.simpleText,
+			title: video.title.simpleText || video.title.runs[0].text,
 			thumbnails: {
 				best: bestThumbnail(video.thumbnail.thumbnails),
 				all: video.thumbnail.thumbnails
