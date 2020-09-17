@@ -1,6 +1,6 @@
 {
   "name": "yt-playlist-scraper",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Package that retrieves the videos in a youtube playlist without an API key.",
   "main": "src/index.js",
   "keywords": [

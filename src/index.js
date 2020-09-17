@@ -45,151 +45,160 @@ const getPlaylist = ID => new Promise((resolve, reject) => {
 			// Array of the videos inside the playlist
 			const ytInitialData = collectData(html)
 
-			//Something went wrong fetching the json and it has been handled
-			if (!ytInitialData)
-				return
+			if (!ytInitialData.microformat || !ytInitialData.microformat.microformatDataRenderer)
+				return reject("Unable to retrieve playlist data")
 
-			const title = ytInitialData
-				.microformat
-				.microformatDataRenderer
-				.title
+			try {
 
-			const description = ytInitialData
-			.microformat
-			.microformatDataRenderer
-			.description
-			
-			const thumbnails = {
-				all: ytInitialData
+				//Something went wrong fetching the json and it has been handled
+				if (!ytInitialData)
+					return
+
+				const title = ytInitialData
 					.microformat
 					.microformatDataRenderer
-					.thumbnail
-					.thumbnails,
-				best: util.bestThumbnail(
-						ytInitialData
+					.title
+				
+				const description = ytInitialData
+				.microformat
+				.microformatDataRenderer
+				.description
+				
+				const thumbnails = {
+					all: ytInitialData
 						.microformat
 						.microformatDataRenderer
 						.thumbnail
-						.thumbnails
-					)
-			}
-
-			let videos = util.formatVideoList(ytInitialData)
-			
-			const results = {
-				id: ID,
-				thumbnails,
-				description,
-				title,
-				videos
-			}
-
-			loadMore(ytInitialData)
-
-			function loadMore(ytData) {
-
-				let continuations
-				let clientVersion
-
-				//Object is browse_ajax response
-				if (ytData.length) {
-					continuations = ytData[1]
-						.response
-						.continuationContents
-						.playlistVideoListContinuation
-						.continuations
-					clientVersion = ytData[1]
-						.response
-						.responseContext
-						.serviceTrackingParams
-						.find(x => x.service == "CSI")
-						.params
-						.find(x => x.key == "cver")
-						.value
+						.thumbnails,
+					best: util.bestThumbnail(
+							ytInitialData
+							.microformat
+							.microformatDataRenderer
+							.thumbnail
+							.thumbnails
+						)
 				}
 
-				//Object is ytInitialData
-				else if (ytData.contents) {
-					continuations = ytData
-						.contents
-						.twoColumnBrowseResultsRenderer
-						.tabs[0]
-						.tabRenderer
-						.content
-						.sectionListRenderer
-						.contents[0]
-						.itemSectionRenderer
-						.contents[0]
-						.playlistVideoListRenderer
-						.continuations
-					clientVersion = ytData
-						.responseContext
-						.serviceTrackingParams
-						.find(x => x.service == "CSI")
-						.params
-						.find(x => x.key == "cver")
-						.value
-				}
+				let videos = util.formatVideoList(ytInitialData)
 				
-				else {
-					return reject(Error("Can't recognize json data"))
+				const results = {
+					id: ID,
+					thumbnails,
+					description,
+					title,
+					videos
 				}
 
-				//If the continuations is not present we have all videos
-				if (!continuations) {
-		
-					resolve(results)
-					return
+				loadMore(ytInitialData)
 
-				}
+				function loadMore(ytData) {
 
-				const continuation = continuations[0]
+					let continuations
+					let clientVersion
 
-				const url = new URL("https://www.youtube.com")
-				url.pathname = "/browse_ajax"
-				//url.searchParams.append("ctoken", continuation.nextContinuationData.continuation)
-				url.searchParams.append("continuation", continuation.nextContinuationData.continuation)
-				//url.searchParams.append("itct", continuation.nextContinuationData.clickTrackingParams)
+					//Object is browse_ajax response
+					if (ytData.length) {
+						continuations = ytData[1]
+							.response
+							.continuationContents
+							.playlistVideoListContinuation
+							.continuations
+						clientVersion = ytData[1]
+							.response
+							.responseContext
+							.serviceTrackingParams
+							.find(x => x.service == "CSI")
+							.params
+							.find(x => x.key == "cver")
+							.value
+					}
 
-				//Get the next 100 videos and add them to the list
-				https.get(url,
- 					{
-						//Only with these headers will we get a json response
-						headers: {
-							"x-youtube-client-name": "1",
-							"x-youtube-client-version": clientVersion || "2.20200609.04.01"
-						}
-					} , res => {
+					//Object is ytInitialData
+					else if (ytData.contents) {
+						continuations = ytData
+							.contents
+							.twoColumnBrowseResultsRenderer
+							.tabs[0]
+							.tabRenderer
+							.content
+							.sectionListRenderer
+							.contents[0]
+							.itemSectionRenderer
+							.contents[0]
+							.playlistVideoListRenderer
+							.continuations
+						clientVersion = ytData
+							.responseContext
+							.serviceTrackingParams
+							.find(x => x.service == "CSI")
+							.params
+							.find(x => x.key == "cver")
+							.value
+					}
 					
-					const { statusCode } = res
-		
-					if (statusCode != 200) {
+					else {
+						return reject(Error("Can't recognize json data"))
+					}
 
-						reject(Error(`Non 200 code received at fetchMore request (received ${statusCode})`))
-						
-						// Consume response to free memory
-						res.resume()
+					//If the continuations is not present we have all videos
+					if (!continuations) {
+			
+						resolve(results)
 						return
 
 					}
 
-					let html = ""
-					res.on("data", chunk => html += chunk)
-					res.on("end", () => {
+					const continuation = continuations[0]
+
+					const url = new URL("https://www.youtube.com")
+					url.pathname = "/browse_ajax"
+					//url.searchParams.append("ctoken", continuation.nextContinuationData.continuation)
+					url.searchParams.append("continuation", continuation.nextContinuationData.continuation)
+					//url.searchParams.append("itct", continuation.nextContinuationData.clickTrackingParams)
+
+					//Get the next 100 videos and add them to the list
+					https.get(url,
+						{
+							//Only with these headers will we get a json response
+							headers: {
+								"x-youtube-client-name": "1",
+								"x-youtube-client-version": clientVersion || "2.20200609.04.01"
+							}
+						} , res => {
 						
-						try {
-							var json = JSON.parse(html)
-						} catch (err) {
-							return reject(Error("Unable to parse JSON (browse_ajax)"))
+						const { statusCode } = res
+			
+						if (statusCode != 200) {
+
+							reject(Error(`Non 200 code received at fetchMore request (received ${statusCode})`))
+							
+							// Consume response to free memory
+							res.resume()
+							return
+
 						}
 
-						results.videos = results.videos.concat(util.formatVideoList(json))
+						let html = ""
+						res.on("data", chunk => html += chunk)
+						res.on("end", () => {
+							
+							try {
+								var json = JSON.parse(html)
+							} catch (err) {
+								return reject(Error("Unable to parse JSON (browse_ajax)"))
+							}
 
-						loadMore(json)
-					
+							results.videos = results.videos.concat(util.formatVideoList(json))
+
+							loadMore(json)
+						
+						})
 					})
-				})
 
+				}
+			}
+			catch (err) {
+				reject(err)
 			}
 
 		})
@@ -206,7 +215,7 @@ const getPlaylist = ID => new Promise((resolve, reject) => {
 			reject(err)
 			return null
 		}
-	
+
 		if (!ytInitialData) {
 			reject(Error("Unable to retrieve playlist data"))
 			return
