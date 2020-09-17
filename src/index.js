@@ -46,7 +46,7 @@ const getPlaylist = ID => new Promise((resolve, reject) => {
 			const ytInitialData = collectData(html)
 
 			if (!ytInitialData.microformat || !ytInitialData.microformat.microformatDataRenderer)
-				return reject("Unable to retrieve playlist data")
+				return reject(Error("Unable to retrieve playlist data"))
 
 			try {
 
