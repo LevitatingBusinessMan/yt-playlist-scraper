@@ -4,13 +4,12 @@ function formatVideoList(ytData) {
 
 	var rawVideoList
 
-	//Object is browse_ajax response
-	if (ytData.length) {
-		rawVideoList = ytData[1]
-			.response
-			.continuationContents
-			.playlistVideoListContinuation
-			.contents
+	//Object is browse response
+	if (ytData.onResponseReceivedActions) {
+		rawVideoList = ytData
+			.onResponseReceivedActions[0]
+			.appendContinuationItemsAction
+			.continuationItems
 	}
 
 	//Object is ytInitialData
@@ -34,11 +33,19 @@ function formatVideoList(ytData) {
 	}
 
 	const videos = []
+	let continuation
 	for (video of rawVideoList) {
+
+
+		if (video.continuationItemRenderer) {
+			continuation = video.continuationItemRenderer
+			continue
+		}
+
 		video = video.playlistVideoRenderer
 
 		// Video probably deleted
-		if (!video.shortBylineText)
+		if (!video || !video.shortBylineText)
 			continue
 
 		const vidElement = {
@@ -60,7 +67,10 @@ function formatVideoList(ytData) {
 		videos.push(vidElement)
 
 	}
-	return videos
+	return {
+		videos,
+		continuation
+	}
 
 }
 
