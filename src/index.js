@@ -99,7 +99,7 @@ function getHtml(ID) {
 			gl:       "NL",
 			m:        "false",
 			pc:       "yt",
-			continue: "https://www.youtube.com/playlist?list=PLc1l1_YXYDH4BoWto9Mds2aaL_bn1lAG_",
+			continue: "https://www.youtube.com/playlist?list=" + ID,
 			ca:       "r",
 			x:        "6",
 			v:        "cb.20210716-13-p1.nl+FX",
