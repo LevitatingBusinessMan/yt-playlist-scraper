@@ -22,6 +22,9 @@ playlists("PLc1l1_YXYDH4BoWto9Mds2aaL_bn1lAG_")
 You can refer to the [example_output.json](https://github.com/LevitatingBusinessMan/yt-playlist-scraper/blob/master/example_output.json) file to see an example of the data this package outputs.
 
 ## How this scraper works
+
+The following text does not include getting through the cookie consent barrier. Although the currently implementation is fairly straightforward I still want to do more research in finding a more efficient way.
+
 ##### Initial request
 First this scraper makes a request to `https://www.youtube.com/playlist?list=$ID`, but this is already where it gets tricky, because there are 2 possible responses for that request. Only when requesting with a User-Agent header set will youtube respond the same way as it does in the browser, we need this response because it contains a piece of json  (an object called ytInitialData) inside the html which we can parse to get all the video data without having to rely on the HTML itself.
 This however only fetches us the first 100 videos
